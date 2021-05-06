@@ -1,6 +1,6 @@
 #include "Timer.h"
 
-#include "RadioLedSwitch.h"
+#include "RadioLedsSwitch.h"
 
 
 module RadioLedsSwitchC @safe() {
