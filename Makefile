@@ -1,0 +1,4 @@
+COMPONENT=RadioLedsSwitchAppC
+
+include $(MAKERULES)
+
