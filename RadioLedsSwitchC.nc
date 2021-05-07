@@ -19,6 +19,11 @@ implementation {
 
     bool locked;
     uint16_t counter = 0;
+    uint16_t led2[3] = {0,0,0};
+    //led2[0]=0;
+    //led2[1]=0;
+    //led2[2]=0;
+    
 
     event void Boot.booted() {
         call AMControl.start();
@@ -49,7 +54,7 @@ implementation {
     }
 
     event void MilliTimer.fired() {
-        dbg("RadioLedSwitch", "RadioLedSwitch: timer fired, counter is %hu.\n", counter);
+        //dbg("RadioLedSwitch", "RadioLedSwitch: timer fired, counter is %hu.\n", counter);
         if (locked) {
             return;
         } else {
@@ -61,7 +66,7 @@ implementation {
             rcm -> counter = counter;
             rcm -> sender_id = TOS_NODE_ID;
             if (call AMSend.send(AM_BROADCAST_ADDR, & packet, sizeof(radio_switch_message_t)) == SUCCESS) {
-                dbg("RadioLedSwitch", "RadioLedSwitch: packet sent.\n", counter);
+               // dbg("RadioLedSwitch", "RadioLedSwitch: packet sent.\n", counter);
                 locked = TRUE;
             }
         }
@@ -69,57 +74,59 @@ implementation {
 
     event message_t * Receive.receive(message_t * bufPtr,
         void * payload, uint8_t len) {
-        int led0, led1,led2;
-        led0 = 0;
-        led1 = 0;
-        led2 = 0;
+        //int led0, led1,led2;
+        //led0 = 0;
+        //led1 = 0;
+        //led2 = 0;
         counter++;
-        dbg("RadioCountToLedsC", "Received packet of length %hhu.\n", len);
+       //dbg("RadioCountToLedsC", "Received packet of length %hhu.\n", len);
         if (len != sizeof(radio_switch_message_t)) {
             return bufPtr;
         } else {
             radio_switch_message_t * rcm = (radio_switch_message_t * ) payload;
             if (rcm -> counter % 10 == 0) {
                 call Leds.led0Off();
-                led0 = 0;
+                led2[0] = 0;
                 call Leds.led1Off();
-                led1 = 0;
+                led2[1] = 0;
                 call Leds.led2Off();
-                led2 = 0;
+                led2[2] = 0;
             } else {
-		        switch (TOS_NODE_ID) {
+		        switch (rcm->sender_id) {
 		        case 1:
 		            call Leds.led0Toggle();
-		            if (led0 == 0){
-		            	led0 = 1;
+		            if (led2[0] == 0){
+		            	led2[0] = 1;
 		            	}
 		            else{
-		            	led0 = 0;}
+		            	led2[0] = 0;}
 		            break;
 		        case 2:
 		            call Leds.led1Toggle();
-		            if (led1 == 0){
-		            	led1 = 1;
+		            if (led2[1] == 0){
+		            	led2[1] = 1;
 		            	}
 		            else{
-		            	led1 = 0;}
+		            	led2[1] = 0;}
 		            break;
 		        case 3:
 		            call Leds.led2Toggle();
-		            if (led2 == 0){
-		            	led2 = 1;
+		            if (led2[2] == 0){
+		            	led2[2] = 1;
 		            	}
 		            else{
-		            	led2 = 0;}
+		            	led2[2] = 0;}
 		            break;
 		        }
                 
             }
-
-           
-            printf("%d%d%d,",led0,led1,led2); //Leds.get() not working 
-            printfflush();
             
+			
+			if (TOS_NODE_ID ==2) {
+			printf("sender: %d, led2:", rcm->sender_id);//debug
+            printf("%d%d%d,",led2[0],led2[1],led2[2]); //Leds.get() not working 
+            printfflush();
+            }
             return bufPtr;
         }
     }
