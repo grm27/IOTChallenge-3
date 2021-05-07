@@ -87,39 +87,37 @@ implementation {
                 call Leds.led2Off();
                 led2 = 0;
             } else {
-                call Leds.led0Off();
-                led0 = 0;
+		        switch (TOS_NODE_ID) {
+		        case 1:
+		            call Leds.led0Toggle();
+		            if (led0 == 0){
+		            	led0 = 1;
+		            	}
+		            else{
+		            	led0 = 0;}
+		            break;
+		        case 2:
+		            call Leds.led1Toggle();
+		            if (led1 == 0){
+		            	led1 = 1;
+		            	}
+		            else{
+		            	led1 = 0;}
+		            break;
+		        case 3:
+		            call Leds.led2Toggle();
+		            if (led2 == 0){
+		            	led2 = 1;
+		            	}
+		            else{
+		            	led2 = 0;}
+		            break;
+		        }
+                
             }
 
-            switch (TOS_NODE_ID) {
-            case 1:
-                call Leds.led0Toggle();
-                if (led0 == 0){
-                	led0 = 1;
-                	}
-                else{
-                	led0 = 0;}
-                break;
-            case 2:
-                call Leds.led1Toggle();
-                if (led1 == 0){
-                	led1 = 1;
-                	}
-                else{
-                	led1 = 0;}
-                break;
-            case 3:
-                call Leds.led2Toggle();
-                if (led2 == 0){
-                	led2 = 1;
-                	}
-                else{
-                	led2 = 0;}
-                break;
-            }
-            
-            //TODO print led values
-            printf("%d%d%d,",led0,led1,led2); //get() non va, non stampa nulla
+           
+            printf("%d%d%d,",led0,led1,led2); //Leds.get() not working 
             printfflush();
             
             return bufPtr;
