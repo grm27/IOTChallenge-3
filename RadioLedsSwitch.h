@@ -1,5 +1,7 @@
 #ifndef RADIO_LEDS_SWITCH_H
 #define RADIO_LEDS_SWITCH_H
+#define NEW_PRINTF_SEMANTICS
+#include "printf.h"
 
 typedef nx_struct radio_switch_message {
   nx_uint16_t counter;

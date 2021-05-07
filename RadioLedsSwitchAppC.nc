@@ -1,5 +1,6 @@
 #include "RadioLedsSwitch.h"
-
+#include "printf.h"
+#define NEW_PRINTF_SEMANTIC
 
 configuration RadioLedsSwitchAppC {}
 implementation {
@@ -8,6 +9,8 @@ implementation {
   components new AMReceiverC(AM_SWITCH);
   components new TimerMilliC();
   components ActiveMessageC;
+  components SerialStartC;
+  components PrintfC;
   
   App.Boot -> MainC.Boot;
   
