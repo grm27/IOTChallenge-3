@@ -37,6 +37,7 @@ implementation {
     }
 
     void switchMoteLedState(int led_index) {
+     	 if (TOS_NODE_ID == 2) {printf("mod %d", led_index);  printfflush();}
         if (led[led_index] == 0)
             led[led_index] = 1;
         else
@@ -91,22 +92,26 @@ implementation {
 
     event message_t * Receive.receive(message_t * bufPtr,
         void * payload, uint8_t len) {
-        
-        if (TOS_NODE_ID == 2) {
-                printf("RGB: %d%d%d,", led[2], led[1], led[0]); //Leds.get() not working 
-                printfflush();
-            }
-
+       
         counter++;
+  
         //dbg("RadioCountToLedsC", "Received packet of length %hhu.\n", len);
         if (len != sizeof(radio_switch_message_t)) {
             return bufPtr;
         } else {
+        
             radio_switch_message_t * rcm = (radio_switch_message_t * ) payload;
+            
+              if (TOS_NODE_ID == 2) {
+                printf("B%d-%d%d%d,", rcm->sender_id,  led[2], led[1], led[0]); //Leds.get() not working 
+                printfflush();
+            }
 
             if (rcm -> counter % 10 == 0) {
                 resetMoteLeds();
+               if (TOS_NODE_ID == 2) {printf("module 10"); printfflush();}
             } else {
+            if (TOS_NODE_ID == 2) {printf("else");  printfflush();}
                 switch (rcm -> sender_id) {
                 case 1:
                     call Leds.led0Toggle();
@@ -123,6 +128,13 @@ implementation {
                 }
 
             }
+            
+             
+        if (TOS_NODE_ID == 2) {
+                printf("A%d-%d%d%d,", rcm->sender_id,  led[2], led[1], led[0]); //Leds.get() not working 
+                printfflush();
+            }
+
 
             return bufPtr;
         }
