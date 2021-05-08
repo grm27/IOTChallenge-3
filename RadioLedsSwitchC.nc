@@ -15,34 +15,26 @@ module RadioLedsSwitchC @safe() {
         interface Packet;
     }
 }
+
 implementation {
 
     message_t packet;
 
     bool locked;
     uint16_t counter = 0;
-    uint16_t led[3] = {
-        0,
-        0,
-        0
+    bool led[3] = {
+        FALSE,
+        FALSE,
+        FALSE
     };
-    
-     void resetMoteLeds() {
+
+    void resetMoteLeds() {
         call Leds.led0Off();
-        led[0] = 0;
+        led[0] = FALSE;
         call Leds.led1Off();
-        led[1] = 0;
+        led[1] = FALSE;
         call Leds.led2Off();
-        led[2] = 0;
-    }
-
-    void switchMoteLedState(int led_index) {
-     	 if (TOS_NODE_ID == 2) {printf("mod %d", led_index);  printfflush();}
-        if (led[led_index] == 0)
-            led[led_index] = 1;
-        else
-            led[led_index] = 0;
-
+        led[2] = FALSE;
     }
 
     event void Boot.booted() {
@@ -72,7 +64,7 @@ implementation {
     }
 
     event void MilliTimer.fired() {
-        //dbg("RadioLedSwitch", "RadioLedSwitch: timer fired, counter is %hu.\n", counter);
+        dbg("RadioLedSwitch", "RadioLedSwitch: timer fired, counter is %hu.\n", counter);
         if (locked) {
             return;
         } else {
@@ -92,52 +84,42 @@ implementation {
 
     event message_t * Receive.receive(message_t * bufPtr,
         void * payload, uint8_t len) {
-       
+
         counter++;
-  
-        //dbg("RadioCountToLedsC", "Received packet of length %hhu.\n", len);
+
+        dbg("RadioLedSwitch", "Received packet of length %hhu.\n", len);
         if (len != sizeof(radio_switch_message_t)) {
             return bufPtr;
         } else {
-        
+
             radio_switch_message_t * rcm = (radio_switch_message_t * ) payload;
-            
-              if (TOS_NODE_ID == 2) {
-                printf("B%d-%d%d%d,", rcm->sender_id,  led[2], led[1], led[0]); //Leds.get() not working 
-                printfflush();
-            }
 
             if (rcm -> counter % 10 == 0) {
                 resetMoteLeds();
-               if (TOS_NODE_ID == 2) {printf("module 10"); printfflush();}
             } else {
-            if (TOS_NODE_ID == 2) {printf("else");  printfflush();}
                 switch (rcm -> sender_id) {
                 case 1:
                     call Leds.led0Toggle();
-                    switchMoteLedState(0);
+                    led[0] = !led[0];
                     break;
                 case 2:
                     call Leds.led1Toggle();
-                    switchMoteLedState(1);
+                    led[1] = !led[1];
                     break;
                 case 3:
                     call Leds.led2Toggle();
-                    switchMoteLedState(2);
+                    led[2] = !led[2];
                     break;
                 }
-
-            }
-            
-             
-        if (TOS_NODE_ID == 2) {
-                printf("A%d-%d%d%d,", rcm->sender_id,  led[2], led[1], led[0]); //Leds.get() not working 
-                printfflush();
             }
 
+            if (TOS_NODE_ID == 2) {
+                printf("%d%d%d\n", led[2], led[1], led[0]);
+            }
 
-            return bufPtr;
         }
+
+        return bufPtr;
     }
 
     event void AMSend.sendDone(message_t * bufPtr, error_t error) {
@@ -145,5 +127,4 @@ implementation {
             locked = FALSE;
         }
     }
-
 }
